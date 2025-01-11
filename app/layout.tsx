@@ -1,9 +1,7 @@
-import './globals.css'
-import { Inter } from 'next/font/google'
-import Layout from './components/Layout'
-import { Metadata } from 'next'
-
-const inter = Inter({ subsets: ['latin'] })
+import './globals.css'; // Global styles
+import Layout from './components/Layout'; // Your layout component
+import Head from 'next/head'; // Import Head from Next.js
+import { Metadata } from 'next'; // Import Metadata from Next.js
 
 export const metadata: Metadata = {
   title: {
@@ -50,19 +48,19 @@ export const metadata: Metadata = {
     google: 'your-google-site-verification-code',
     yandex: 'your-yandex-verification-code',
   },
-}
+};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <Head>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;700&display=swap" />
+        <title>{metadata.title.default}</title>
+        {/* You can also add any additional meta tags here */}
+      </Head>
+      <body className="font-inter"> {/* Use your font class here */}
         <Layout>{children}</Layout>
       </body>
     </html>
-  )
+  );
 }
-
