@@ -1,38 +1,31 @@
-// app/products/page.tsx
-'use client';
-
-import { useEffect, useState } from 'react';
 import ProductCard from './ProductCard';
-import { fetchProducts } from '../../lib/api';
-import { Product } from '../../lib/types/product';
+import { Metadata } from 'next';
 
-const ProductsPage = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [error, setError] = useState<string | null>(null);
+export const metadata: Metadata = {
+  title: 'Our Products',
+  description: 'Explore our wide range of tech products including laptops, smartphones, and accessories.',
+};
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const data = await fetchProducts();
-        setProducts(data);
-      } catch (err: unknown) { // Use unknown instead of any
-        setError('Failed to fetch products');
-        console.error(err); // Log the error for debugging
-      }
-    })();
-  }, []);
+// Fetch products from the API
+const fetchProducts = async () => {
+  const response = await fetch('http://localhost:5000/products/');
+  if (!response.ok) {
+    throw new Error('Failed to fetch products');
+  }
+  return response.json();
+};
+
+export default async function Products() {
+  const products = await fetchProducts(); // Fetch the product data
 
   return (
-    <div>
-      <h1>Products</h1>
-      {error && <p className="text-red-500">{error}</p>}
-      <div className="grid grid-cols-2 gap-4">
-        {products.map(product => (
+    <div className="animate-fade-in p-4">
+      <h1 className="text-4xl font-bold mb-8 text-center">Our Products</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {products.map((product: { id: number; name: string; price: number; description: string; stock: number; image_url: string; }) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
     </div>
   );
-};
-
-export default ProductsPage;
+}

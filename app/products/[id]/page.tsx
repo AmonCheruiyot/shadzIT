@@ -1,52 +1,24 @@
-// app/products/[id]/page.tsx
+import ProductDetailsClient from './ProductDetailsClient';
+import { Metadata } from 'next';
 
-"use client"; // Add this line at the top to mark this component as a client component
-
-import { useEffect, useState } from 'react';
-import Image from 'next/image'; // Import the Image component from Next.js
-import { fetchProduct } from '../../../lib/api';
-import { Product } from '../../../lib/types/product';
-
-interface Params {
-  id: string;
-}
-
-const ProductDetailPage = ({ params }: { params: Params }) => {
-  const [product, setProduct] = useState<Product | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const data = await fetchProduct(params.id);
-        setProduct(data);
-      } catch (err: any) { // Type the caught error as 'any'
-        setError('Product not found');
-        console.error(err); // Log the error for debugging purposes
-      }
-    })();
-  }, [params.id]);
-
-  if (error) {
-    return <div>Error: {error}</div>; // Display the error if it exists
+const fetchProduct = async (id: string) => {
+  const response = await fetch(`http://localhost:5000/products/${id}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch product with id: ${id}`);
   }
-
-  if (!product) return null;
-
-  return (
-    <div>
-      <h1>{product.name}</h1>
-      <p>Price: ${product.price.toFixed(2)}</p>
-      <p>Description: {product.description}</p>
-      <Image 
-        src={product.image_url} 
-        alt={product.name} 
-        width={500} // Replace with appropriate values
-        height={300} // Replace with appropriate values
-        priority // Set priority if this is a significant image
-      />
-    </div>
-  );
+  return response.json();
 };
 
-export default ProductDetailPage;
+// Generate metadata for SEO
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const product = await fetchProduct(params.id);
+  return {
+    title: product.name,
+    description: `${product.name} - ${product.description.slice(0, 160)}...`,
+  };
+}
+
+export default async function ProductPage({ params }: { params: { id: string } }) {
+  const product = await fetchProduct(params.id); // Fetch product data on the server
+  return <ProductDetailsClient product={product} />;
+}
